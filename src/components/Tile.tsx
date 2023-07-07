@@ -1,12 +1,14 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { motion } from 'framer-motion';
+import { PairItem } from '../types/model/PairItem';
 
 interface IProps {
 	value: number | string;
 	id: number;
 	uniqueId: string;
 	isFound: boolean;
+	onClick: ({ id, uniqueId, value }: PairItem) => void;
 }
 
 const variants = {
@@ -22,63 +24,26 @@ const variants = {
 	},
 };
 
-export const Tile: React.FC<IProps> = ({ value, id, uniqueId, isFound }) => {
-	const {
-		setMoves,
-		moves,
-		selectedItems,
-		setSelectedItems,
-		setBlockUI,
-		setTiles,
-		tiles,
-		blockUI,
-	} = useGameStore((state) => state);
+export const Tile: React.FC<IProps> = ({
+	value,
+	id,
+	uniqueId,
+	isFound,
+	onClick,
+}) => {
+	const { selectedItems } = useGameStore((state) => state);
 
 	const isFlipped = selectedItems.some((item) => item.uniqueId === uniqueId);
 
-	const onClick = () => {
+	const handleOnClick = useCallback(() => {
 		if (isFound) return;
-		if (blockUI) return;
 		if (isFlipped) return;
-		if (selectedItems.length < 2) {
-			setSelectedItems([
-				...selectedItems,
-				{
-					id,
-					uniqueId,
-					value,
-					isFound: false,
-				},
-			]);
 
-			if (selectedItems[0]?.value === value) {
-				setBlockUI(true);
-				setTimeout(() => {
-					setSelectedItems([]);
-					setTiles([
-						...tiles.map((tile) => {
-							if (tile.id === id) {
-								return {
-									...tile,
-									isFound: true,
-								};
-							}
-							return tile;
-						}),
-					]);
-					setBlockUI(false);
-				}, 1000);
-			}
-
-			setMoves(moves + 1);
-		}
-	};
+		onClick({ id, uniqueId, value, isFound });
+	}, [isFound, id, isFlipped, uniqueId, value, onClick]);
 
 	return (
-		<div
-			style={{ perspective: '350px', opacity: isFound ? 0 : 1 }}
-			onClick={onClick}
-		>
+		<div style={{ perspective: '350px', opacity: isFound ? 0 : 1 }}>
 			<motion.div
 				style={{
 					transformStyle: 'preserve-3d',
@@ -86,7 +51,7 @@ export const Tile: React.FC<IProps> = ({ value, id, uniqueId, isFound }) => {
 				}}
 				variants={variants}
 				animate={isFlipped ? 'selected' : 'notSelected'}
-				onClick={onClick}
+				onClick={handleOnClick}
 				className="relative w-20 h-20 bg-white border-gray-300 cursor-pointer border-2 hover:bg-gray-300 flex items-center justify-center"
 			>
 				{!isFlipped ? (

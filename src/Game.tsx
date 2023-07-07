@@ -1,28 +1,10 @@
-import { useEffect } from 'react';
 import { Counter } from './components/Counter';
 import { GameGrid } from './components/GameGrid';
 import { Tile } from './components/Tile';
 import { useGameLogic } from './hooks/useGameLogic';
-import { useGameStore } from './store/gameStore';
 
 export const Game = () => {
-	const { selectedItems, setSelectedItems, setBlockUI, tiles } = useGameStore(
-		(state) => state
-	);
-
-	useGameLogic();
-
-	useEffect(() => {
-		if (selectedItems.length === 2) {
-			setBlockUI(true);
-			setTimeout(() => {
-				setSelectedItems([]);
-				setBlockUI(false);
-			}, 1000);
-		}
-	}, [selectedItems, setBlockUI, setSelectedItems]);
-
-	console.log(tiles);
+	const { tiles, onClick } = useGameLogic();
 
 	return (
 		<div>
@@ -31,6 +13,7 @@ export const Game = () => {
 				{tiles.map((tile) => {
 					return (
 						<Tile
+							onClick={onClick}
 							value={tile.value}
 							id={tile.id}
 							key={tile.uniqueId}
