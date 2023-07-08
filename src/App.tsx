@@ -1,19 +1,15 @@
-import { Game } from './Game';
+import { Game } from './components/Game';
 import { Container } from './components/Container';
 import { GameSettings } from './components/GameSettings/GameSettings';
 import { useGameStore } from './store/gameStore';
 import { GameLevels } from './types/enums/GameLevels';
 
 function App() {
-	const { level, isEnd } = useGameStore((state) => state);
+	const { level } = useGameStore((state) => state);
 
 	return (
 		<Container>
-			{level === GameLevels.NOT_PICKED ? (
-				<GameSettings />
-			) : (
-				<Game isEnd={isEnd} />
-			)}
+			{level === GameLevels.NOT_PICKED ? <GameSettings /> : <Game />}
 		</Container>
 	);
 }

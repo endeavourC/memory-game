@@ -1,8 +1,8 @@
-import { Heading } from './components/Heading';
-import { GameGrid } from './components/GameGrid';
-import { Tile } from './components/Tile';
-import { useGameLogic } from './hooks/useGameLogic';
-import { useGameStore } from './store/gameStore';
+import { Heading } from './Heading';
+import { GameGrid } from './GameGrid';
+import { Tile } from './Tile';
+import { useGameLogic } from '../hooks/useGameLogic';
+import { useGameStore } from '../store/gameStore';
 import { useCallback } from 'react';
 
 export const Game: React.FC = () => {
