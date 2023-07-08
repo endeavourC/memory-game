@@ -26,41 +26,27 @@ export const useGameLogic = () => {
 		return makeShuffleAlgorithm(numberOfCards, numberValues);
 	}, [numberOfCards]);
 
-	const onClick = useCallback(
-		(item: PairItem) => {
-			if (!blockUI && selectedItems.length < 2) {
-				updateSelectedItems(selectedItems, setSelectedItems, item);
-				proceedItemsIfTheyMatch(
-					selectedItems,
-					setBlockUI,
-					setSelectedItems,
-					setTiles,
-					tiles,
-					item
-				);
+	const onClick = (item: PairItem) => {
+		if (!blockUI && selectedItems.length < 2) {
+			updateSelectedItems(selectedItems, setSelectedItems, item);
+			processWhenItemsMatch(
+				selectedItems,
+				setBlockUI,
+				setSelectedItems,
+				setTiles,
+				tiles,
+				item
+			);
 
-				setMoves(moves + 1);
-			}
-		},
-		[
-			blockUI,
-			moves,
-			selectedItems,
-			setBlockUI,
-			setMoves,
-			setSelectedItems,
-			setTiles,
-			tiles,
-		]
-	);
+			setMoves(moves + 1);
+		}
+	};
 
 	useEffect(() => {
 		if (selectedItems.length === 2) {
-			setBlockUI(true);
-			setTimeout(() => {
+			runAsyncCallback(setBlockUI, () => {
 				setSelectedItems([]);
-				setBlockUI(false);
-			}, 1000);
+			});
 		}
 	}, [selectedItems, setBlockUI, setSelectedItems]);
 
@@ -70,7 +56,7 @@ export const useGameLogic = () => {
 		}
 	}, [tiles, setTiles, cards]);
 
-	return { tiles: cards, onClick };
+	return { tiles, onClick };
 };
 
 const getNumberOfCards = (level: number) => {
@@ -94,7 +80,7 @@ const updateSelectedItems = (
 	setSelectedItems(updatedSelectedItems);
 };
 
-const proceedItemsIfTheyMatch = (
+const processWhenItemsMatch = (
 	selectedItems: PairItem[],
 	setBlockUI: (blockUI: boolean) => void,
 	setSelectedItems: (selectedItems: Array<PairItem>) => void,
@@ -103,8 +89,7 @@ const proceedItemsIfTheyMatch = (
 	item: PairItem
 ) => {
 	if (selectedItems[0]?.value === item.value) {
-		setBlockUI(true);
-		setTimeout(() => {
+		runAsyncCallback(setBlockUI, () => {
 			setSelectedItems([]);
 			setTiles([
 				...tiles.map((tile) => {
@@ -117,7 +102,18 @@ const proceedItemsIfTheyMatch = (
 					return tile;
 				}),
 			]);
-			setBlockUI(false);
-		}, 1000);
+		});
 	}
+};
+
+const runAsyncCallback = <T extends () => void>(
+	setBlockUI: (value: boolean) => void,
+	callback: T,
+	timeout = 1000
+) => {
+	setBlockUI(true);
+	setTimeout(() => {
+		callback();
+		setBlockUI(false);
+	}, timeout);
 };

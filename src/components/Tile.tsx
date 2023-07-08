@@ -43,7 +43,7 @@ export const Tile: React.FC<IProps> = ({
 	}, [isFound, id, isFlipped, uniqueId, value, onClick]);
 
 	return (
-		<div style={{ perspective: '350px', opacity: isFound ? 0 : 1 }}>
+		<motion.div style={{ perspective: '350px', opacity: isFound ? 0 : 1 }}>
 			<motion.div
 				style={{
 					transformStyle: 'preserve-3d',
@@ -67,6 +67,6 @@ export const Tile: React.FC<IProps> = ({
 					</div>
 				)}
 			</motion.div>
-		</div>
+		</motion.div>
 	);
 };
