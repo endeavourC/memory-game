@@ -1,6 +1,6 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { motion } from 'framer-motion';
+import { motion, useAnimate } from 'framer-motion';
 import { PairItem } from '../types/model/PairItem';
 
 interface IProps {
@@ -32,18 +32,27 @@ export const Tile: React.FC<IProps> = ({
 	onClick,
 }) => {
 	const { selectedItems } = useGameStore((state) => state);
+	const [scope, animate] = useAnimate();
 
 	const isFlipped = selectedItems.some((item) => item.uniqueId === uniqueId);
 
-	const handleOnClick = useCallback(() => {
-		if (isFound) return;
+	const handleOnClick = () => {
 		if (isFlipped) return;
 
 		onClick({ id, uniqueId, value, isFound });
-	}, [isFound, id, isFlipped, uniqueId, value, onClick]);
+	};
+
+	useEffect(() => {
+		if (isFound) {
+			animate(scope.current, {
+				scale: 0,
+				transition: { duration: 0.3 },
+			});
+		}
+	}, [isFound]);
 
 	return (
-		<motion.div style={{ perspective: '350px', opacity: isFound ? 0 : 1 }}>
+		<motion.div ref={scope} style={{ perspective: '350px' }}>
 			<motion.div
 				style={{
 					transformStyle: 'preserve-3d',

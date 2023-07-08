@@ -1,13 +1,11 @@
-import { gameDifficulty } from '../config/settings';
+import { useRunAsyncCallback } from './useRunAsyncCallback';
 import { useGameStore } from '../store/gameStore';
-import { makeShuffleAlgorithm } from '../utils/makeShuffleAlgorithm';
-import { numberValues } from '../config/pairValues';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { PairItem } from '../types/model/PairItem';
+import { useGenerateCards } from './useGenerateCards';
 
 export const useGameLogic = () => {
 	const {
-		level,
 		tiles,
 		blockUI,
 		moves,
@@ -15,40 +13,14 @@ export const useGameLogic = () => {
 		setMoves,
 		selectedItems,
 		setSelectedItems,
-		setBlockUI,
 	} = useGameStore((state) => state);
 
-	const numberOfCards = useMemo(() => {
-		return getNumberOfCards(level);
-	}, [level]);
-
-	const cards = useMemo(() => {
-		return makeShuffleAlgorithm(numberOfCards, numberValues);
-	}, [numberOfCards]);
-
-	const onClick = (item: PairItem) => {
-		if (!blockUI && selectedItems.length < 2) {
-			updateSelectedItems(selectedItems, setSelectedItems, item);
-			processWhenItemsMatch(
-				selectedItems,
-				setBlockUI,
-				setSelectedItems,
-				setTiles,
-				tiles,
-				item
-			);
-
-			setMoves(moves + 1);
-		}
-	};
+	const { runAsyncCallback } = useRunAsyncCallback();
+	const { cards } = useGenerateCards();
 
 	useEffect(() => {
-		if (selectedItems.length === 2) {
-			runAsyncCallback(setBlockUI, () => {
-				setSelectedItems([]);
-			});
-		}
-	}, [selectedItems, setBlockUI, setSelectedItems]);
+		clearWhenItemsNotMatch(selectedItems, runAsyncCallback, setSelectedItems);
+	}, [selectedItems]);
 
 	useEffect(() => {
 		if (tiles.length === 0) {
@@ -56,12 +28,22 @@ export const useGameLogic = () => {
 		}
 	}, [tiles, setTiles, cards]);
 
-	return { tiles, onClick };
-};
+	const onClick = (item: PairItem) => {
+		if (blockUI || selectedItems.length > 2 || item.isFound) return;
+		setMoves(moves + 1);
 
-const getNumberOfCards = (level: number) => {
-	const pairs = gameDifficulty[level as keyof typeof gameDifficulty];
-	return pairs * 2;
+		updateSelectedItems(selectedItems, setSelectedItems, item);
+
+		processWhenItemsMatch(
+			selectedItems,
+			runAsyncCallback,
+			setSelectedItems,
+			setTiles,
+			tiles,
+			item
+		);
+	};
+	return { tiles, onClick };
 };
 
 const updateSelectedItems = (
@@ -82,14 +64,14 @@ const updateSelectedItems = (
 
 const processWhenItemsMatch = (
 	selectedItems: PairItem[],
-	setBlockUI: (blockUI: boolean) => void,
+	runAsyncCallback: (callback: () => void, timeout?: number) => void,
 	setSelectedItems: (selectedItems: Array<PairItem>) => void,
 	setTiles: (tiles: Array<PairItem>) => void,
 	tiles: Array<PairItem>,
 	item: PairItem
 ) => {
 	if (selectedItems[0]?.value === item.value) {
-		runAsyncCallback(setBlockUI, () => {
+		runAsyncCallback(() => {
 			setSelectedItems([]);
 			setTiles([
 				...tiles.map((tile) => {
@@ -106,14 +88,17 @@ const processWhenItemsMatch = (
 	}
 };
 
-const runAsyncCallback = <T extends () => void>(
-	setBlockUI: (value: boolean) => void,
-	callback: T,
-	timeout = 1000
+const clearWhenItemsNotMatch = (
+	selectedItems: Array<PairItem>,
+	runAsyncCallback: (callback: () => void, timeout?: number) => void,
+	setSelectedItems: (selectedItems: Array<PairItem>) => void
 ) => {
-	setBlockUI(true);
-	setTimeout(() => {
-		callback();
-		setBlockUI(false);
-	}, timeout);
+	if (
+		selectedItems[0]?.value !== selectedItems[1]?.value &&
+		selectedItems.length === 2
+	) {
+		runAsyncCallback(() => {
+			setSelectedItems([]);
+		});
+	}
 };
