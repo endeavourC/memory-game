@@ -47,9 +47,9 @@ export const Tile: React.FC<IProps> = ({
 			animate(scope.current, {
 				scale: 0,
 				transition: { duration: 0.3 },
-			});
+			}).play();
 		}
-	}, [isFound]);
+	}, [isFound, animate, scope]);
 
 	return (
 		<motion.div ref={scope} style={{ perspective: '350px' }}>
