@@ -4,6 +4,7 @@ import { Tile } from './Tile';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { useGameStore } from '../store/gameStore';
 import { useCallback } from 'react';
+import { EndModal } from './EndModal';
 
 export const Game: React.FC = () => {
 	const { tiles, onClick } = useGameLogic();
@@ -16,15 +17,6 @@ export const Game: React.FC = () => {
 	return (
 		<div>
 			<Heading onGoBack={onGoBack} />
-			{isEnd && (
-				<div className="flex items-center justify-center w-full h-full absolute top-0 left-0 bg-gray-900 bg-opacity-50">
-					<div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-white rounded-lg">
-						<p className="text-3xl">Koniec gry!</p>
-						<p className="text-3xl">Gratulacje!</p>
-						<button onClick={onGoBack}>Zacznij od nowa</button>
-					</div>
-				</div>
-			)}
 			<GameGrid>
 				{tiles.map((tile) => {
 					return (
@@ -39,6 +31,7 @@ export const Game: React.FC = () => {
 					);
 				})}
 			</GameGrid>
+			{isEnd ? <EndModal onClose={onGoBack} /> : null}
 		</div>
 	);
 };
