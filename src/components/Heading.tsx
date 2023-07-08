@@ -1,12 +1,11 @@
-import { useCallback } from 'react';
 import { useGameStore } from '../store/gameStore';
 
-export const Counter = () => {
-	const { moves, setInitialValues } = useGameStore((state) => state);
+interface IProps {
+	onGoBack: () => void;
+}
 
-	const onGoBack = useCallback(() => {
-		setInitialValues();
-	}, [setInitialValues]);
+export const Heading: React.FC<IProps> = ({ onGoBack }) => {
+	const { moves } = useGameStore((state) => state);
 
 	return (
 		<div className="flex items-center justify-between w-full border-b-2 border-gray-200 mb-16 pb-4">

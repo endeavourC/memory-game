@@ -6,6 +6,7 @@ import { useGenerateCards } from './useGenerateCards';
 import { processWhenItemsMatch } from '../utils/processWhenItemsMatch';
 import { updateSelectedItems } from '../utils/updateSelectedItems';
 import { clearWhenItemsNotMatch } from '../utils/clearWhenItemsNotMatch';
+import { checkIfGameIsEnded } from '../utils/checkIfGameIsEnded';
 
 export const useGameLogic = () => {
 	const {
@@ -16,6 +17,7 @@ export const useGameLogic = () => {
 		setMoves,
 		selectedItems,
 		setSelectedItems,
+		setIsEnd,
 	} = useGameStore((state) => state);
 
 	const { runAsyncCallback } = useRunAsyncCallback();
@@ -29,7 +31,9 @@ export const useGameLogic = () => {
 		if (tiles.length === 0) {
 			setTiles(cards);
 		}
-	}, [tiles, setTiles, cards]);
+
+		checkIfGameIsEnded(tiles, setIsEnd);
+	}, [tiles, setTiles, cards, setIsEnd]);
 
 	const onClick = (item: PairItem) => {
 		if (blockUI || selectedItems.length > 2 || item.isFound) return;

@@ -5,11 +5,15 @@ import { useGameStore } from './store/gameStore';
 import { GameLevels } from './types/enums/GameLevels';
 
 function App() {
-	const { level } = useGameStore((state) => state);
+	const { level, isEnd } = useGameStore((state) => state);
 
 	return (
 		<Container>
-			{level === GameLevels.NOT_PICKED ? <GameSettings /> : <Game />}
+			{level === GameLevels.NOT_PICKED ? (
+				<GameSettings />
+			) : (
+				<Game isEnd={isEnd} />
+			)}
 		</Container>
 	);
 }
